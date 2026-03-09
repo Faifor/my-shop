@@ -119,7 +119,9 @@ export const adminApi = {
   createCategory: (payload: { name: string; external_key?: string }) =>
     apiClient<Category>("/admin/categories", { method: "POST", body: JSON.stringify(payload) }),
   getCategories: () => apiClient<Category[]>("/admin/categories"),
-  createProduct: (payload: { name: string; category_id: number; external_key?: string }) =>
+  deleteCategory: (categoryId: number | string) =>
+    apiClient<Record<string, unknown>>(`/admin/categories/${categoryId}`, { method: "DELETE" }),
+  createProduct: (payload: { name: string; category_id: number; description?: string; external_key?: string }) =>
     apiClient<Product>("/admin/products", { method: "POST", body: JSON.stringify(payload) }),
   getProducts: () => apiClient<Product[]>("/admin/products"),
   uploadProductImages: (productId: number, files: File[]) => {
