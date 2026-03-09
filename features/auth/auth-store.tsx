@@ -3,10 +3,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "@/lib/api/requests";
 import { tokenStorage } from "@/lib/api/client";
-import type { AuthResponse, User } from "@/types/api";
+import type { AuthResponse, UserRead } from "@/types/api";
 
 type AuthContextValue = {
-  user: User | null;
+  user: UserRead | null;
   loading: boolean;
   login: (payload: { email: string; password: string }) => Promise<void>;
   register: (payload: { email: string; full_name: string; phone?: string; password: string }) => Promise<void>;
@@ -16,13 +16,13 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function handleAuth(response: AuthResponse, setUser: (user: User | null) => void) {
+function handleAuth(response: AuthResponse, setUser: (user: UserRead | null) => void) {
   tokenStorage.setTokens(response.tokens);
   setUser(response.user);
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserRead | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refreshMe = async () => {

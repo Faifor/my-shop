@@ -6,7 +6,7 @@ import { useAuth } from "@/features/auth/auth-store";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
 
-  if (!user || user.role !== "ADMIN") {
+  if (!user || user.role !== "admin") {
     return <main className="container py-10">Доступ только для администратора.</main>;
   }
 

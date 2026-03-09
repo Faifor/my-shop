@@ -16,7 +16,7 @@ export default function CartPage() {
         {(cart?.items?.length ?? 0) === 0 && <p className="mt-4 text-slate-500">В корзине пусто.</p>}
         <div className="mt-5 space-y-3">
           {(cart?.items ?? []).map((item) => (
-            <div key={item.variant_id} className="flex items-center justify-between rounded-lg border bg-white p-3">
+            <div key={String(item.variant_id)} className="flex items-center justify-between rounded-lg border bg-white p-3">
               <div>
                 <p className="font-semibold">{item.product_name ?? item.variant_name ?? item.variant_id}</p>
                 <p className="text-sm text-slate-500">{item.line_total ?? 0} ₽</p>

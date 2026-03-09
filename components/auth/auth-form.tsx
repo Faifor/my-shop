@@ -16,8 +16,8 @@ export function AuthForm({ type, onSubmit }: AuthFormProps) {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!email.includes("@") || password.length < 6) {
-      setError("Проверьте email и пароль (минимум 6 символов)");
+    if (!email.includes("@") || password.length < 8) {
+      setError("Проверьте email и пароль (минимум 8 символов)");
       return;
     }
     setError("");

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { catalogApi } from "@/lib/api/requests";
+import { adminApi } from "@/lib/api/requests";
 import { useAsyncData } from "@/lib/use-async-data";
 
 export default function AdminCategoriesPage() {
-  const categories = useAsyncData("categories", catalogApi.getCategories);
+  const categories = useAsyncData("admin-categories", adminApi.getCategories);
   const [name, setName] = useState("");
 
   return (
@@ -16,7 +16,7 @@ export default function AdminCategoriesPage() {
         <button
           className="rounded bg-slate-900 px-3 py-1 text-white"
           onClick={async () => {
-            await catalogApi.createCategory({ name });
+            await adminApi.createCategory({ name });
             setName("");
             await categories.refetch();
           }}
