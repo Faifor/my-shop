@@ -9,18 +9,18 @@ import { useAsyncData } from "@/lib/use-async-data";
 
 export default function ProductPage({ params }: { params: { productId: string } }) {
   const products = useAsyncData("products", catalogApi.getProducts);
-  const reviews = useAsyncData(`reviews-${params.productId}`, () => catalogApi.getReviews(params.productId));
+  const reviews = useAsyncData(`reviews-${params.productId}`, () => catalogApi.getReviews(Number(params.productId)));
   const [qty, setQty] = useState(1);
   const { user } = useAuth();
   const { ensureCart, updateItem } = useCartStore();
 
-  const product = useMemo(() => (products.data ?? []).find((item) => item.id === params.productId), [params.productId, products.data]);
+  const product = useMemo(() => (products.data ?? []).find((item) => String(item.id) === params.productId), [params.productId, products.data]);
   const variant = product?.variants?.[0];
 
   const add = async () => {
     if (!user || !variant) return;
     await ensureCart(user.id);
-    await updateItem(variant.id, qty);
+    await updateItem(Number(variant.id), qty);
   };
 
   return (
@@ -51,7 +51,7 @@ export default function ProductPage({ params }: { params: { productId: string } 
           {(reviews.data ?? []).map((review) => (
             <article key={review.id} className="mt-3 rounded-md border bg-white p-3">
               <p className="font-medium">Оценка: {review.rating}/5</p>
-              <p className="text-sm text-slate-600">{review.text}</p>
+              <p className="text-sm text-slate-600">{review.review}</p>
             </article>
           ))}
         </section>

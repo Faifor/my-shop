@@ -13,7 +13,7 @@ export default function CatalogPage() {
   const [sortBy, setSortBy] = useState<"price" | "rating">("rating");
 
   const view = useMemo(() => {
-    const filtered = (products.data ?? []).filter((item) => categoryId === "all" || item.category_id === categoryId);
+    const filtered = (products.data ?? []).filter((item) => categoryId === "all" || String(item.category_id) === categoryId);
     return filtered.sort((a, b) => {
       if (sortBy === "price") return (a.variants?.[0]?.price ?? 0) - (b.variants?.[0]?.price ?? 0);
       return (b.rating ?? 0) - (a.rating ?? 0);

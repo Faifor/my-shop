@@ -7,7 +7,7 @@ import { useCartStore } from "@/features/cart/cart-store";
 
 export default function CheckoutPage() {
   const { cart } = useCartStore();
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "online">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "yookassa">("cod");
   const [status, setStatus] = useState<string>("");
 
   const submit = async () => {
@@ -29,7 +29,7 @@ export default function CheckoutPage() {
           <p>Сумма заказа: {cart?.total ?? 0} ₽</p>
           <div className="mt-3 space-y-2">
             <label className="flex items-center gap-2"><input type="radio" name="payment" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} />Наложенный платеж</label>
-            <label className="flex items-center gap-2"><input type="radio" name="payment" checked={paymentMethod === "online"} onChange={() => setPaymentMethod("online")} />Онлайн оплата</label>
+            <label className="flex items-center gap-2"><input type="radio" name="payment" checked={paymentMethod === "yookassa"} onChange={() => setPaymentMethod("yookassa")} />YooKassa</label>
           </div>
           <button className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-white" onClick={submit}>Подтвердить заказ</button>
           {status && <p className="mt-3 text-sm">{status}</p>}

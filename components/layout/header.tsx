@@ -36,7 +36,7 @@ export function Header({ products = [] }: { products?: Product[] }) {
         {user ? (
           <>
             <Link href="/profile" className="text-sm">{user.full_name}</Link>
-            {user.role === "ADMIN" && <Link href="/admin" className="text-sm">Админ</Link>}
+            {user.role === "admin" && <Link href="/admin" className="text-sm">Админ</Link>}
             <button onClick={logout} className="rounded-md border px-3 py-1 text-sm">Выйти</button>
           </>
         ) : (
