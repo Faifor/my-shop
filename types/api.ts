@@ -49,6 +49,7 @@ export interface Product {
   category_id?: number;
   external_key?: string;
   rating?: number;
+  base_price?: number;
   images?: ProductImage[];
   variants?: ProductVariant[];
 }

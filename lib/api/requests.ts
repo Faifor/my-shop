@@ -15,6 +15,54 @@ import type {
   UserRead,
 } from "@/types/api";
 
+
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+
+function normalizeImageUrl(url?: string) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+
+  const apiOrigin = API_URL.replace(/\/api\/v1\/?$/, "");
+  return `${apiOrigin}/${url.replace(/^\/+/, "")}`;
+}
+
+type CatalogProductApi = {
+  id: number;
+  name?: string;
+  title?: string;
+  description?: string;
+  category_id?: number;
+  rating?: number;
+  average_rating?: number;
+  base_price?: number | string;
+  images?: Array<{ id?: number; url?: string; image_url?: string; alt?: string; is_primary?: boolean; sort_order?: number }>;
+  variants?: ProductVariant[];
+};
+
+function normalizeCatalogProduct(product: CatalogProductApi): Product {
+  const normalizedImages = (product.images ?? []).map((image) => ({
+    id: image.id,
+    url: normalizeImageUrl(image.url ?? image.image_url),
+    alt: image.alt,
+  })).filter((image) => Boolean(image.url));
+
+  const normalizedPrice = product.base_price !== undefined && product.base_price !== null
+    ? Number(product.base_price)
+    : undefined;
+
+  return {
+    id: product.id,
+    name: product.name ?? product.title ?? "Без названия",
+    description: product.description,
+    category_id: product.category_id,
+    rating: product.rating ?? product.average_rating ?? 0,
+    images: normalizedImages,
+    variants: product.variants,
+    base_price: normalizedPrice,
+  };
+}
+
 export const authApi = {
   register: (payload: { email: string; full_name: string; phone?: string; password: string; role?: UserRead["role"] }) =>
     apiClient<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
@@ -29,7 +77,10 @@ export const authApi = {
 
 export const catalogApi = {
   getCategories: () => apiClient<Category[]>("/catalog/categories"),
-  getProducts: () => apiClient<Product[]>("/catalog/products"),
+  getProducts: async () => {
+    const products = await apiClient<CatalogProductApi[]>("/catalog/products");
+    return products.map(normalizeCatalogProduct);
+  },
   addReview: (productId: number, payload: { user_id: number; rating: number; review: string }) =>
     apiClient<Review>(`/catalog/products/${productId}/reviews`, { method: "POST", body: JSON.stringify(payload) }),
   getReviews: (productId: number) => apiClient<Review[]>(`/catalog/products/${productId}/reviews`),
