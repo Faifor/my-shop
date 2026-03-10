@@ -77,10 +77,23 @@ export const authApi = {
 
 export const catalogApi = {
   getCategories: () => apiClient<Category[]>("/catalog/categories"),
-  getProducts: async () => {
-    const products = await apiClient<CatalogProductApi[]>("/catalog/products");
+  getProducts: async (query?: {
+    category_id?: number;
+    min_price?: number;
+    max_price?: number;
+    q?: string;
+    sort_by?: "id" | "title" | "base_price" | "average_rating" | "reviews_count";
+    sort_order?: "asc" | "desc";
+  }) => {
+    const params = new URLSearchParams();
+    Object.entries(query ?? {}).forEach(([key, value]) => {
+      if (value !== undefined && value !== "") params.set(key, String(value));
+    });
+
+    const products = await apiClient<CatalogProductApi[]>(`/catalog/products${params.toString() ? `?${params.toString()}` : ""}`);
     return products.map(normalizeCatalogProduct);
   },
+  getProductVariants: (productId: number) => apiClient<ProductVariant[]>(`/catalog/products/${productId}/variants`),
   addReview: (productId: number, payload: { user_id: number; rating: number; review: string }) =>
     apiClient<Review>(`/catalog/products/${productId}/reviews`, { method: "POST", body: JSON.stringify(payload) }),
   getReviews: (productId: number) => apiClient<Review[]>(`/catalog/products/${productId}/reviews`),
@@ -121,7 +134,7 @@ export const adminApi = {
   getCategories: () => apiClient<Category[]>("/admin/categories"),
   deleteCategory: (categoryId: number | string) =>
     apiClient<Record<string, unknown>>(`/admin/categories/${categoryId}`, { method: "DELETE" }),
-  createProduct: (payload: { name: string; category_id: number; description?: string; external_key?: string }) =>
+  createProduct: (payload: { name: string; category_id: number; base_price: number; description?: string; external_key?: string }) =>
     apiClient<Product>("/admin/products", { method: "POST", body: JSON.stringify(payload) }),
   getProducts: () => apiClient<Product[]>("/admin/products"),
   uploadProductImages: (productId: number, files: File[]) => {
