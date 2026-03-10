@@ -10,20 +10,25 @@ import { useAsyncData } from "@/lib/use-async-data";
 
 export default function ProductPage({ params }: { params: { productId: string } }) {
   const products = useAsyncData("products", catalogApi.getProducts);
+  const variants = useAsyncData(`variants-${params.productId}`, () => catalogApi.getProductVariants(Number(params.productId)));
   const reviews = useAsyncData(`reviews-${params.productId}`, () => catalogApi.getReviews(Number(params.productId)));
   const [qty, setQty] = useState(1);
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const { user } = useAuth();
   const { ensureCart, updateItem } = useCartStore();
 
   const product = useMemo(() => (products.data ?? []).find((item) => String(item.id) === params.productId), [params.productId, products.data]);
-  const variant = product?.variants?.[0];
   const image = product?.images?.[0]?.url;
-  const price = variant?.price ?? product?.base_price;
+  const selectedVariant = useMemo(
+    () => (variants.data ?? []).find((item) => item.id === selectedVariantId) ?? (variants.data ?? [])[0],
+    [selectedVariantId, variants.data],
+  );
+  const price = selectedVariant?.price ?? product?.base_price;
 
   const add = async () => {
-    if (!user || !variant) return;
+    if (!user || !selectedVariant) return;
     await ensureCart(user.id);
-    await updateItem(Number(variant.id), qty);
+    await updateItem(Number(selectedVariant.id), qty);
   };
 
   return (
@@ -39,9 +44,25 @@ export default function ProductPage({ params }: { params: { productId: string } 
               <p className="mt-2 text-slate-600">{product.description}</p>
               <p className="mt-2">⭐ {product.rating ?? "—"}</p>
               <p className="mt-4 text-2xl font-bold">{price !== undefined ? `${price} ₽` : "Цена по запросу"}</p>
+
+              <div className="mt-4 rounded-xl border border-slate-200 p-3">
+                <p className="text-sm font-medium">Варианты товара</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(variants.data ?? []).map((variant) => (
+                    <button
+                      key={variant.id}
+                      className={`rounded-lg border px-3 py-1 text-sm ${selectedVariant?.id === variant.id ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300"}`}
+                      onClick={() => setSelectedVariantId(variant.id)}
+                    >
+                      {variant.sku}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="mt-4 flex items-center gap-2">
                 <input type="number" className="w-20 rounded-md border px-2 py-1" min={1} value={qty} onChange={(e) => setQty(Number(e.target.value) || 1)} />
-                <button onClick={add} className="rounded-md bg-slate-900 px-4 py-2 text-white" disabled={!user}>Добавить в корзину</button>
+                <button onClick={add} className="rounded-md bg-slate-900 px-4 py-2 text-white" disabled={!user || !selectedVariant}>Добавить в корзину</button>
               </div>
               {!user && <p className="mt-2 text-sm text-slate-500">Для покупки необходимо авторизоваться.</p>}
             </div>
